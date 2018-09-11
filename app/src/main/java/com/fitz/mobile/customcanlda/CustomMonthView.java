@@ -103,17 +103,17 @@ public class CustomMonthView extends MonthView {
         //兼容硬件加速无效的代码
         setLayerType(View.LAYER_TYPE_SOFTWARE, mSelectedPaint);
         //4.0以上硬件加速会导致无效
-        mSelectedPaint.setMaskFilter(new BlurMaskFilter(28, BlurMaskFilter.Blur.SOLID));
+        mSelectedPaint.setMaskFilter(new BlurMaskFilter(15, BlurMaskFilter.Blur.SOLID));
 
         setLayerType(View.LAYER_TYPE_SOFTWARE, mSchemeBasicPaint);
-        mSchemeBasicPaint.setMaskFilter(new BlurMaskFilter(28, BlurMaskFilter.Blur.SOLID));
+        mSchemeBasicPaint.setMaskFilter(new BlurMaskFilter(15, BlurMaskFilter.Blur.SOLID));
 
     }
 
     @Override
     protected void onPreviewHook() {
         mSolarTermTextPaint.setTextSize(mCurMonthLunarTextPaint.getTextSize());
-        mRadius = Math.min(mItemWidth, mItemHeight) / 11 * 5;
+        mRadius = Math.min(mItemWidth, mItemHeight) / 13 * 5;
     }
 
 
@@ -132,10 +132,10 @@ public class CustomMonthView extends MonthView {
         if (isSelected) {
             mPointPaint.setColor(Color.WHITE);
         } else {
-            mPointPaint.setColor(Color.GRAY);
+            mPointPaint.setColor(Color.GREEN);
         }
 
-        canvas.drawCircle(x + mItemWidth / 2, y + mItemHeight - 3 * mPadding, mPointRadius, mPointPaint);
+        canvas.drawCircle(x + mItemWidth / 2, y + mItemHeight - 4 * mPadding, mPointRadius, mPointPaint);
     }
 
     @Override
@@ -153,7 +153,7 @@ public class CustomMonthView extends MonthView {
             canvas.drawCircle(cx, cy, mRadius, mCurrentDayPaint);
         }
 
-        if (hasScheme) {
+        if (hasScheme && !"no_need".equals(calendar.getScheme())) {
             canvas.drawCircle(x + mItemWidth - mPadding - mCircleRadius / 2, y + mPadding + mCircleRadius, mCircleRadius, mSchemeBasicPaint);
             mTextPaint.setColor(calendar.getSchemeColor());
             canvas.drawText(calendar.getScheme(), x + mItemWidth - mPadding - mCircleRadius, y + mPadding + mSchemeBaseLine, mTextPaint);

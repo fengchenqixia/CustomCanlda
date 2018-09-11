@@ -20,7 +20,7 @@ public class CustomWeekView extends WeekView {
 
 
     private int mRadius;
-
+    private boolean showLunar;
     /**
      * 自定义魅族标记的文本画笔
      */
@@ -60,7 +60,7 @@ public class CustomWeekView extends WeekView {
 
     public CustomWeekView(Context context) {
         super(context);
-        mTextPaint.setTextSize(dipToPx(context, 8));
+        mTextPaint.setTextSize(dipToPx(context, 6));
         mTextPaint.setColor(0xffffffff);
         mTextPaint.setAntiAlias(true);
         mTextPaint.setFakeBoldText(true);
@@ -87,7 +87,7 @@ public class CustomWeekView extends WeekView {
         mCurrentDayPaint.setColor(0xFFeaeaea);
 
 
-        mCircleRadius = dipToPx(getContext(), 7);
+        mCircleRadius = dipToPx(getContext(), 5);
 
         mPadding = dipToPx(getContext(), 3);
 
@@ -99,10 +99,10 @@ public class CustomWeekView extends WeekView {
         //兼容硬件加速无效的代码
         setLayerType(View.LAYER_TYPE_SOFTWARE, mSelectedPaint);
         //4.0以上硬件加速会导致无效
-        mSelectedPaint.setMaskFilter(new BlurMaskFilter(28, BlurMaskFilter.Blur.SOLID));
+        mSelectedPaint.setMaskFilter(new BlurMaskFilter(15, BlurMaskFilter.Blur.SOLID));
 
         setLayerType(View.LAYER_TYPE_SOFTWARE, mSchemeBasicPaint);
-        mSchemeBasicPaint.setMaskFilter(new BlurMaskFilter(28, BlurMaskFilter.Blur.SOLID));
+        mSchemeBasicPaint.setMaskFilter(new BlurMaskFilter(15, BlurMaskFilter.Blur.SOLID));
     }
 
 
@@ -128,7 +128,7 @@ public class CustomWeekView extends WeekView {
         if (isSelected) {
             mPointPaint.setColor(Color.WHITE);
         } else {
-            mPointPaint.setColor(Color.GRAY);
+            mPointPaint.setColor(Color.GREEN);
         }
 
         canvas.drawCircle(x + mItemWidth / 2, mItemHeight - 3 * mPadding, mPointRadius, mPointPaint);

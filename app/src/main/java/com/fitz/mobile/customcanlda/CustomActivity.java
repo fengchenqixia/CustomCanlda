@@ -12,6 +12,9 @@ import com.haibin.calendarview.Calendar;
 import com.haibin.calendarview.CalendarLayout;
 import com.haibin.calendarview.CalendarView;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class CustomActivity extends BaseActivity implements
         CalendarView.OnCalendarSelectListener,
@@ -69,10 +72,36 @@ public class CustomActivity extends BaseActivity implements
 
         mCalendarView.scrollToNext(true);
     }
+
+    //  对日期事件进行标注，如果不需要直接将text赋值为 "no_need",代码中会对该字段进行判断
     @Override
     protected void initData() {
+        int year = mCalendarView.getCurYear();
+        int month = mCalendarView.getCurMonth();
+        Map<String, Calendar> map = new HashMap<>();
 
+        map.put(getSchemeCalendar(year, month, 3).toString(),
+                getSchemeCalendar(year, month, 3));
 
+        map.put(getSchemeCalendar(year, month, 6).toString(),
+                getSchemeCalendar(year, month, 6));
+
+        map.put(getSchemeCalendar(year, month, 9).toString(),
+                getSchemeCalendar(year, month, 9));
+
+        //此方法在巨大的数据量上不影响遍历性能，推荐使用
+        mCalendarView.setSchemeDate(map);
+
+    }
+
+    private Calendar getSchemeCalendar(int year, int month, int day) {
+        Calendar calendar = new Calendar();
+        calendar.setYear(year);
+        calendar.setMonth(month);
+        calendar.setDay(day);
+        calendar.setSchemeColor(0xFF13acf0);//如果单独标记颜色、则会使用这个颜色
+        calendar.setScheme("no_need");
+        return calendar;
     }
 
 
