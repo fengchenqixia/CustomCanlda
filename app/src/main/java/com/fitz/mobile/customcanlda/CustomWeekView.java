@@ -144,7 +144,7 @@ public class CustomWeekView extends WeekView {
             canvas.drawCircle(cx, cy, mRadius, mCurrentDayPaint);
         }
 
-        if(hasScheme){
+        if(hasScheme && !"no_need".equals(calendar.getScheme())){
             canvas.drawCircle(x + mItemWidth - mPadding - mCircleRadius / 2, mPadding + mCircleRadius, mCircleRadius, mSchemeBasicPaint);
 
             mTextPaint.setColor(calendar.getSchemeColor());
