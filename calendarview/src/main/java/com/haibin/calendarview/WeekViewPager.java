@@ -40,6 +40,11 @@ public final class WeekViewPager extends ViewPager {
     private int mWeekCount;
     private CalendarViewDelegate mDelegate;
 
+    public boolean isVisibilityState() {
+        return mVisibilityState;
+    }
+
+    private boolean mVisibilityState;
     /**
      * 日历布局，需要在日历下方放自己的布局
      */
@@ -82,7 +87,8 @@ public final class WeekViewPager extends ViewPager {
             @Override
             public void onPageSelected(int position) {
                 //默认的显示星期四，周视图切换就显示星期4
-                if (getVisibility() != VISIBLE) {
+               // if (getVisibility() != VISIBLE) {
+                if (!mVisibilityState){
                     isUsingScrollToCalendar = false;
                     return;
                 }
@@ -156,7 +162,7 @@ public final class WeekViewPager extends ViewPager {
         isUpdateWeekView = true;
         notifyDataSetChanged();
         isUpdateWeekView = false;
-        if (getVisibility() != VISIBLE) {
+        if (!mVisibilityState) {
             return;
         }
         isUsingScrollToCalendar = true;
@@ -230,15 +236,15 @@ public final class WeekViewPager extends ViewPager {
             view.setSelectedCalendar(mDelegate.getCurrentDay());
             view.invalidate();
         }
-        if (mDelegate.mDateSelectedListener != null && getVisibility() == VISIBLE) {
+        if (mDelegate.mDateSelectedListener != null && mVisibilityState) {
             mDelegate.mDateSelectedListener.onDateSelected(mDelegate.mSelectedCalendar, false);
         }
 
-        if (mDelegate.mCalendarSelectListener != null && getVisibility() == VISIBLE) {
+        if (mDelegate.mCalendarSelectListener != null && mVisibilityState) {
             mDelegate.mCalendarSelectListener.onCalendarSelect(mDelegate.mSelectedCalendar, false);
         }
 
-        if (getVisibility() == VISIBLE) {
+        if (mVisibilityState) {
             mDelegate.mInnerListener.onWeekDateSelected(mDelegate.getCurrentDay(), false);
         }
         int i = CalendarUtil.getWeekFromDayInMonth(mDelegate.getCurrentDay(), mDelegate.getWeekStart());
@@ -379,6 +385,10 @@ public final class WeekViewPager extends ViewPager {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         heightMeasureSpec = MeasureSpec.makeMeasureSpec(mDelegate.getCalendarItemHeight(), MeasureSpec.EXACTLY);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    public void setVisibilityState(boolean visibilityState) {
+        mVisibilityState = visibilityState;
     }
 
     /**

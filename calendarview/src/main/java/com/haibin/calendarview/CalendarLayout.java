@@ -27,6 +27,7 @@ import android.content.res.TypedArray;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -106,6 +107,7 @@ public class CalendarLayout extends LinearLayout {
      * ContentView
      */
     ViewGroup mContentView;
+    View mContentBgView;
 
 
     /**
@@ -134,6 +136,8 @@ public class CalendarLayout extends LinearLayout {
     private int mTouchSlop;
     private int mContentViewTranslateY; //ContentView  可滑动的最大距离距离 , 固定
     private int mViewPagerTranslateY = 0;// ViewPager可以平移的距离，不代表mMonthView的平移距离
+    private int mViewPagerMonthHeight;//  月视图完整的高度
+    private int mViewPagerWeekHeiht;//周视图完整的高度
 
     private float downY;
     private float mLastY;
@@ -143,6 +147,7 @@ public class CalendarLayout extends LinearLayout {
      * 内容布局id
      */
     private int mContentViewId;
+    private int mContentBgViewId;
 
     /**
      * 手速判断
@@ -154,11 +159,13 @@ public class CalendarLayout extends LinearLayout {
 
     private CalendarViewDelegate mDelegate;
 
+
     public CalendarLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         setOrientation(LinearLayout.VERTICAL);
         TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.CalendarLayout);
         mContentViewId = array.getResourceId(R.styleable.CalendarLayout_calendar_content_view_id, 0);
+        mContentBgViewId = array.getResourceId(R.styleable.CalendarLayout_calendar_content_bg_view_id, 0);
         mDefaultStatus = array.getInt(R.styleable.CalendarLayout_default_status, STATUS_EXPAND);
         mCalendarShowMode = array.getInt(R.styleable.CalendarLayout_calendar_show_mode, CALENDAR_SHOW_MODE_BOTH_MONTH_WEEK_VIEW);
         mGestureMode = array.getInt(R.styleable.CalendarLayout_gesture_mode, GESTURE_MODE_DEFAULT);
@@ -166,8 +173,11 @@ public class CalendarLayout extends LinearLayout {
         mVelocityTracker = VelocityTracker.obtain();
         final ViewConfiguration configuration = ViewConfiguration.get(context);
         mTouchSlop = configuration.getScaledTouchSlop();
+        mViewPagerWeekHeiht = mItemHeight;
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
+
     }
+
 
     /**
      * 初始化
@@ -217,20 +227,28 @@ public class CalendarLayout extends LinearLayout {
      * 更新内容ContentView可平移的最大距离
      */
     void updateContentViewTranslateY() {
+        Log.e("TAG", "updateContentViewTranslateY");
         if (mDelegate == null || mContentView == null)
             return;
+        mViewPagerWeekHeiht = mItemHeight;
         Calendar calendar = mDelegate.mIndexCalendar;
         if (mDelegate.getMonthViewShowMode() == CalendarViewDelegate.MODE_ALL_MONTH) {
             mContentViewTranslateY = 5 * mItemHeight;
+            mViewPagerMonthHeight = 5 * mItemHeight;
+
         } else {
             mContentViewTranslateY = CalendarUtil.getMonthViewHeight(calendar.getYear(), calendar.getMonth(), mItemHeight, mDelegate.getWeekStart())
                     - mItemHeight;
+            mViewPagerMonthHeight = mContentViewTranslateY + mItemHeight;
         }
         //已经显示周视图，则需要动态平移contentView的高度
-        if (mWeekPager.getVisibility() == VISIBLE) {
+        if (!getMonthViewShowState()) {
             if (mContentView == null)
                 return;
             mContentView.setTranslationY(-mContentViewTranslateY);
+            setMonthViewState(false);
+        } else {
+            setMonthViewState(true);
         }
     }
 
@@ -282,14 +300,18 @@ public class CalendarLayout extends LinearLayout {
                 }
 
                 float dy = y - mLastY;
+                if (Math.abs(dy) < mTouchSlop) return false;
                 //向上滑动，并且contentView平移到最大距离，显示周视图
                 if (dy < 0 && mContentView.getTranslationY() == -mContentViewTranslateY) {
                     //mContentView.onTouchEvent(event);
+                    Log.e("TAG", "showWeek");
                     showWeek();
                     return false;
                 }
-                hideWeek();
-
+                /*if (Math.abs(dy)>mTouchSlop) {
+                    hideWeek();
+                    Log.e("TAG", "hideWeek");
+                }*/
                 //向下滑动，并且contentView已经完全平移到底部
                 if (dy > 0 && mContentView.getTranslationY() + dy >= 0) {
                     mContentView.setTranslationY(0);
@@ -333,9 +355,9 @@ public class CalendarLayout extends LinearLayout {
                     }
                     return super.onTouchEvent(event);
                 }
-                if (event.getY() - downY > 0) {
+                if (event.getY() - downY > mTouchSlop) {
                     expand();
-                } else {
+                } else if (downY - event.getY() > mTouchSlop) {
                     shrink();
                 }
                 break;
@@ -410,6 +432,27 @@ public class CalendarLayout extends LinearLayout {
         return super.onInterceptTouchEvent(ev);
     }
 
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        final int action = ev.getAction();
+        float topY = getY()+ mItemHeight +CalendarUtil.dipToPx(getContext(), 40)
+                +(mDelegate != null ? mDelegate.getWeekBarHeight() : CalendarUtil.dipToPx(getContext(), 40));
+
+        mContentView.setClickable(true);
+        switch (action) {
+
+            case MotionEvent.ACTION_DOWN:
+                float downY = ev.getY();
+
+                if (!getMonthViewShowState() && downY > topY ) {
+
+                    mContentView.setClickable(false);
+                    return false;
+                }
+                break;
+        }
+        return super.dispatchTouchEvent(ev);
+    }
 
     private int getPointerIndex(MotionEvent ev, int id) {
         int activePointerIndex = MotionEventCompat.findPointerIndex(ev, id);
@@ -422,16 +465,19 @@ public class CalendarLayout extends LinearLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
         if (mContentView != null && mMonthView != null) {
             int h = getHeight() - mItemHeight
                     - (mDelegate != null ? mDelegate.getWeekBarHeight() :
                     CalendarUtil.dipToPx(getContext(), 40))
                     - CalendarUtil.dipToPx(getContext(), 1);
-            int heightSpec = MeasureSpec.makeMeasureSpec(h,
+            int mContentOriginHeight = MeasureSpec.makeMeasureSpec(h,
                     MeasureSpec.EXACTLY);
-            mContentView.measure(widthMeasureSpec, heightSpec);
+            mContentView.measure(widthMeasureSpec, mContentOriginHeight);
             mContentView.layout(mContentView.getLeft(), mContentView.getTop(), mContentView.getRight(), mContentView.getBottom());
+            //Log.e("TAG","onMeasure "+MeasureSpec.getSize(heightSpec)+ "======="+MeasureSpec.getMode(heightSpec));
         }
+
     }
 
     @Override
@@ -440,21 +486,67 @@ public class CalendarLayout extends LinearLayout {
         mMonthView = (MonthViewPager) findViewById(R.id.vp_month);
         mWeekPager = (WeekViewPager) findViewById(R.id.vp_week);
         mContentView = (ViewGroup) findViewById(mContentViewId);
+        if (mContentBgViewId != 0)
+            mContentBgView = findViewById(mContentBgViewId);
         mYearView = (YearSelectLayout) findViewById(R.id.selectLayout);
+
         if (mContentView != null) {
             mContentView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         }
+        mWeekPager.setVisibility(VISIBLE);
+        mContentView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isExpand()) shrink();
+            }
+        });
+        setMonthViewState(true);
     }
 
+    private void setMonthViewState(boolean show) {
+        mMonthView.setVisibilityState(show);
+        mWeekPager.setVisibilityState(!show);
+
+        if (show) {
+            mMonthView.setTranslationY(0);
+            mWeekPager.setTranslationY(-mViewPagerWeekHeiht);
+            updateContentViewState(0);
+        } else {
+            mMonthView.setTranslationY(-mContentViewTranslateY);
+            mWeekPager.setTranslationY(0);
+            updateContentViewState(-1);
+        }
+    }
+
+
+    private void updateContentViewState(float percent) {
+        if (mContentBgView != null)
+            mContentBgView.setAlpha(1 + percent);
+    }
+
+    private boolean getMonthViewShowState() {
+        if (mMonthView.getTranslationY() == 0) return true;
+        return false;
+    }
 
     /**
      * 平移ViewPager月视图
      */
     private void translationViewPager() {
         float percent = mContentView.getTranslationY() * 1.0f / mContentViewTranslateY;
-        mMonthView.setTranslationY(mViewPagerTranslateY * percent);
+        Log.e("TAG", "translationViewPager " + mContentView.getTranslationY() + "----" + mContentViewTranslateY + "---" + percent);
+        //mMonthView.setTranslationY(mViewPagerTranslateY * percent);
+        mMonthView.setTranslationY(mContentViewTranslateY * percent);
+        mWeekPager.setTranslationY(-mViewPagerWeekHeiht - mViewPagerWeekHeiht * percent);
+        updateContentViewState(percent);
     }
 
+    private void translationViewPager(float percent) {
+        Log.e("TAG", "translationViewPager percent " + mContentView.getTranslationY() + "----" + mContentViewTranslateY + "---" + percent);
+        mMonthView.setTranslationY(mContentViewTranslateY * percent);
+        mWeekPager.setTranslationY(-mViewPagerWeekHeiht - mViewPagerWeekHeiht * percent);
+        updateContentViewState(percent);
+    }
 
     /**
      * 是否展开了
@@ -462,7 +554,8 @@ public class CalendarLayout extends LinearLayout {
      * @return isExpand
      */
     public final boolean isExpand() {
-        return mContentView == null || mMonthView.getVisibility() == VISIBLE;
+        return mContentView == null || getMonthViewShowState();
+
     }
 
 
@@ -476,11 +569,11 @@ public class CalendarLayout extends LinearLayout {
                 mCalendarShowMode == CALENDAR_SHOW_MODE_ONLY_WEEK_VIEW ||
                 mContentView == null)
             return false;
-        if (mMonthView.getVisibility() != VISIBLE) {
+    /*    if (mMonthView.getVisibility() != VISIBLE) {
             mWeekPager.setVisibility(GONE);
             onShowMonthView();
             mMonthView.setVisibility(VISIBLE);
-        }
+        }*/
         ObjectAnimator objectAnimator = ObjectAnimator.ofFloat(mContentView,
                 "translationY", mContentView.getTranslationY(), 0f);
         objectAnimator.setDuration(240);
@@ -489,7 +582,8 @@ public class CalendarLayout extends LinearLayout {
             public void onAnimationUpdate(ValueAnimator animation) {
                 float currentValue = (Float) animation.getAnimatedValue();
                 float percent = currentValue * 1.0f / mContentViewTranslateY;
-                mMonthView.setTranslationY(mViewPagerTranslateY * percent);
+                //mMonthView.setTranslationY(mViewPagerTranslateY * percent);
+                translationViewPager(percent);
                 isAnimating = true;
             }
         });
@@ -513,6 +607,7 @@ public class CalendarLayout extends LinearLayout {
      * @return 成功或者失败
      */
     public boolean shrink() {
+
         if (isAnimating || mContentView == null) {
             return false;
         }
@@ -524,7 +619,8 @@ public class CalendarLayout extends LinearLayout {
             public void onAnimationUpdate(ValueAnimator animation) {
                 float currentValue = (Float) animation.getAnimatedValue();
                 float percent = currentValue * 1.0f / mContentViewTranslateY;
-                mMonthView.setTranslationY(mViewPagerTranslateY * percent);
+                //mMonthView.setTranslationY(mViewPagerTranslateY * percent);
+                translationViewPager(percent);
                 isAnimating = true;
             }
         });
@@ -562,7 +658,8 @@ public class CalendarLayout extends LinearLayout {
                         public void onAnimationUpdate(ValueAnimator animation) {
                             float currentValue = (Float) animation.getAnimatedValue();
                             float percent = currentValue * 1.0f / mContentViewTranslateY;
-                            mMonthView.setTranslationY(mViewPagerTranslateY * percent);
+                            //mMonthView.setTranslationY(mViewPagerTranslateY * percent);
+                            translationViewPager(percent);
                             isAnimating = true;
                         }
                     });
@@ -596,8 +693,10 @@ public class CalendarLayout extends LinearLayout {
      */
     private void hideWeek() {
         onShowMonthView();
-        mWeekPager.setVisibility(GONE);
-        mMonthView.setVisibility(VISIBLE);
+        /*mWeekPager.setVisibility(GONE);
+        mMonthView.setVisibility(VISIBLE);*/
+        setMonthViewState(true);
+
     }
 
     /**
@@ -606,15 +705,16 @@ public class CalendarLayout extends LinearLayout {
     private void showWeek() {
         onShowWeekView();
         mWeekPager.getAdapter().notifyDataSetChanged();
-        mWeekPager.setVisibility(VISIBLE);
-        mMonthView.setVisibility(INVISIBLE);
+        /*mWeekPager.setVisibility(VISIBLE);
+        mMonthView.setVisibility(INVISIBLE);*/
+        setMonthViewState(false);
     }
 
     /**
      * 周视图显示事件
      */
     private void onShowWeekView() {
-        if (mWeekPager.getVisibility() == VISIBLE) {
+        if (!getMonthViewShowState()) {
             return;
         }
         if (mDelegate.mViewChangeListener != null) {
@@ -627,7 +727,7 @@ public class CalendarLayout extends LinearLayout {
      * 周视图显示事件
      */
     private void onShowMonthView() {
-        if (mMonthView.getVisibility() == VISIBLE) {
+        if (getMonthViewShowState()) {
             return;
         }
         if (mDelegate.mViewChangeListener != null) {
@@ -719,4 +819,6 @@ public class CalendarLayout extends LinearLayout {
          */
         boolean isScrollToTop();
     }
+
+
 }

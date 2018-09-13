@@ -36,6 +36,12 @@ public final class MonthViewPager extends ViewPager {
 
     private boolean isUpdateMonthView;
 
+    public boolean isVisibilityState() {
+        return mVisibilityState;
+    }
+
+    private boolean mVisibilityState;
+
     private int mMonthCount;
 
     private CalendarViewDelegate mDelegate;
@@ -119,7 +125,7 @@ public final class MonthViewPager extends ViewPager {
                 }
 
                 //周视图显示的时候就需要动态改变月视图高度
-                if (mWeekPager.getVisibility() == VISIBLE) {
+                if (mWeekPager.isVisibilityState()) {
                     updateMonthViewHeight(calendar.getYear(), calendar.getMonth());
                     return;
                 }
@@ -185,7 +191,7 @@ public final class MonthViewPager extends ViewPager {
         }
 
         if (mParentLayout != null) {
-            if (getVisibility() != VISIBLE) {//如果已经显示周视图，则需要动态改变月视图高度，否则显示就有bug
+            if (!mVisibilityState) {//如果已经显示周视图，则需要动态改变月视图高度，否则显示就有bug
                 ViewGroup.LayoutParams params = getLayoutParams();
                 params.height = CalendarUtil.getMonthViewHeight(year, month, mDelegate.getCalendarItemHeight(), mDelegate.getWeekStart());
                 setLayoutParams(params);
@@ -232,7 +238,7 @@ public final class MonthViewPager extends ViewPager {
         isUpdateMonthView = true;
         notifyDataSetChanged();
         isUpdateMonthView = false;
-        if (getVisibility() != VISIBLE) {
+        if (!mVisibilityState) {
             return;
         }
         isUsingScrollToCalendar = true;
@@ -340,11 +346,11 @@ public final class MonthViewPager extends ViewPager {
                 mParentLayout.updateSelectPosition(view.getSelectedIndex(mDelegate.getCurrentDay()));
             }
         }
-        if (mDelegate.mDateSelectedListener != null && getVisibility() == VISIBLE) {
+        if (mDelegate.mDateSelectedListener != null && mVisibilityState) {
             mDelegate.mDateSelectedListener.onDateSelected(mDelegate.mSelectedCalendar, false);
         }
 
-        if (mDelegate.mCalendarSelectListener != null && getVisibility() == VISIBLE) {
+        if (mDelegate.mCalendarSelectListener != null && mVisibilityState) {
             mDelegate.mCalendarSelectListener.onCalendarSelect(mDelegate.mSelectedCalendar, false);
         }
     }
@@ -466,6 +472,10 @@ public final class MonthViewPager extends ViewPager {
         } else {
             super.setCurrentItem(item, smoothScroll);
         }
+    }
+
+    public void setVisibilityState(boolean visibilityState) {
+        mVisibilityState = visibilityState;
     }
 
 

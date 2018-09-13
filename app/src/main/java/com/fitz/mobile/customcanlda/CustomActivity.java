@@ -1,9 +1,13 @@
 package com.fitz.mobile.customcanlda;
 
 import android.annotation.SuppressLint;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -12,7 +16,9 @@ import com.haibin.calendarview.Calendar;
 import com.haibin.calendarview.CalendarLayout;
 import com.haibin.calendarview.CalendarView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -29,6 +35,7 @@ public class CustomActivity extends BaseActivity implements
     private CalendarView mCalendarView;
 
 
+    private RecyclerView mRecyclerView;
 
     private CalendarLayout mCalendarLayout;
     private final static String TAG= CustomActivity.class.getSimpleName();
@@ -59,7 +66,31 @@ public class CustomActivity extends BaseActivity implements
         Log.e(TAG,  mCalendarView.getCurYear()+mCalendarView.getCurMonth()+mCalendarView.getCurDay()+"");
         mTitle.setText(mCalendarView.getCurMonth()+"月"+ mCalendarView.getCurDay()+"日");
         mCurrentDay.setText(mCalendarView.getCurYear()+"年"+mCalendarView.getCurMonth()+"月");
+        findViewById(R.id.toggleView).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mCalendarLayout.isExpand())mCalendarLayout.shrink();
+                else mCalendarLayout.expand();
 
+            }
+        });
+
+        mRecyclerView = findViewById(R.id.recy_view);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.setAdapter(new RecyAdapter(this,getDatas()));
+    }
+
+
+    public List<RecyModel> getDatas() {
+
+        List<RecyModel> modelList = new ArrayList<>();
+        for (int i =0;i<20;i++){
+
+            RecyModel model = new RecyModel("this is title "+i,"this is time "+i,"this is loaction1","this is location2");
+            model.isNow = i%2==0;
+            modelList.add(model);
+        }
+        return modelList;
     }
 
 
@@ -105,6 +136,11 @@ public class CustomActivity extends BaseActivity implements
     }
 
 
+
+    public void testClick(View view){
+
+        Toast.makeText(this,"添加事件",Toast.LENGTH_LONG).show();
+    }
     @Override
     public void onCalendarOutOfRange(Calendar calendar) {
 

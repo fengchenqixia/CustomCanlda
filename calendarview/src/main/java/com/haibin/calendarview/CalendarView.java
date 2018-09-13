@@ -138,7 +138,7 @@ public class CalendarView extends FrameLayout {
 
             @Override
             public void onPageSelected(int position) {
-                if (mWeekPager.getVisibility() == VISIBLE) {
+                if (mWeekPager.isVisibilityState()) {
                     return;
                 }
                 if (mDelegate.mYearChangeListener != null) {
@@ -458,7 +458,7 @@ public class CalendarView extends FrameLayout {
         mDelegate.mIndexCalendar = mDelegate.mSelectedCalendar;
         mDelegate.updateSelectCalendarScheme();
         mWeekBar.onDateSelected(mDelegate.mSelectedCalendar, mDelegate.getWeekStart(), false);
-        if (mMonthPager.getVisibility() == VISIBLE) {
+        if (mMonthPager.isVisibilityState()) {
             mMonthPager.scrollToCurrent(smoothScroll);
             mWeekPager.updateSelected(mDelegate.mIndexCalendar, false);
         } else {
@@ -483,7 +483,7 @@ public class CalendarView extends FrameLayout {
     public void scrollToNext(boolean smoothScroll) {
         if (isYearSelectLayoutVisible()) {
             mSelectLayout.setCurrentItem(mSelectLayout.getCurrentItem() + 1, smoothScroll);
-        } else if (mWeekPager.getVisibility() == VISIBLE) {
+        } else if (mWeekPager.isVisibilityState()) {
             mWeekPager.setCurrentItem(mWeekPager.getCurrentItem() + 1, smoothScroll);
         } else {
             mMonthPager.setCurrentItem(mMonthPager.getCurrentItem() + 1, smoothScroll);
@@ -506,7 +506,7 @@ public class CalendarView extends FrameLayout {
     public void scrollToPre(boolean smoothScroll) {
         if (isYearSelectLayoutVisible()) {
             mSelectLayout.setCurrentItem(mSelectLayout.getCurrentItem() - 1, smoothScroll);
-        } else if (mWeekPager.getVisibility() == VISIBLE) {
+        } else if (mWeekPager.isVisibilityState()) {
             mWeekPager.setCurrentItem(mWeekPager.getCurrentItem() - 1, smoothScroll);
         } else {
             mMonthPager.setCurrentItem(mMonthPager.getCurrentItem() - 1, smoothScroll);
@@ -561,7 +561,7 @@ public class CalendarView extends FrameLayout {
             return;
         }
 
-        if (mWeekPager.getVisibility() == VISIBLE) {
+        if (mWeekPager.isVisibilityState()) {
             mWeekPager.scrollToCalendar(year, month, day, smoothScroll);
         } else {
             mMonthPager.scrollToCalendar(year, month, day, smoothScroll);

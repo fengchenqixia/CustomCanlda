@@ -104,6 +104,7 @@
         </attr>
 
         <attr name="calendar_content_view_id" format="integer" />
+        <attr name="calendar_content_bg_view_id" format="integer" />
     </declare-styleable>
 
 

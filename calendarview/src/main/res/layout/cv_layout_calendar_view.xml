@@ -13,6 +13,7 @@
         android:visibility="visible">
 
         <com.haibin.calendarview.MonthViewPager
+            android:background="#fff"
             android:id="@+id/vp_month"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -20,12 +21,15 @@
 
         <com.haibin.calendarview.WeekViewPager
             android:id="@+id/vp_week"
+            android:background="#fff"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_marginTop="41dp"
+
             android:visibility="gone" />
 
         <View
+            android:visibility="gone"
             android:id="@+id/line"
             android:layout_width="match_parent"
             android:layout_height="1px"
