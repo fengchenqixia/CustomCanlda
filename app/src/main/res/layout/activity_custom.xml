@@ -95,6 +95,7 @@
                 app:scheme_theme_color="#128c4b"
                 app:selected_lunar_text_color="#fff"
                 app:selected_text_color="#fff"
+                app:select_mode="single_mode"
                 app:selected_theme_color="#33d991"
                 app:week_background="#fff"
                 app:week_start_with="sun"

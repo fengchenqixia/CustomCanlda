@@ -159,11 +159,13 @@ public class CalendarLayout extends LinearLayout {
 
     int mItemHeight;
 
+    private boolean isInit;
     private CalendarViewDelegate mDelegate;
 
 
     public CalendarLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
+        isInit = true;
         mContext = context;
         setOrientation(LinearLayout.VERTICAL);
         TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.CalendarLayout);
@@ -230,7 +232,7 @@ public class CalendarLayout extends LinearLayout {
      * 更新内容ContentView可平移的最大距离
      */
     void updateContentViewTranslateY() {
-        Log.e("TAG", "updateContentViewTranslateY");
+
         if (mDelegate == null || mContentView == null)
             return;
         mViewPagerWeekHeiht = mItemHeight;
@@ -245,13 +247,12 @@ public class CalendarLayout extends LinearLayout {
 
         }
         //已经显示周视图，则需要动态平移contentView的高度
-        if (!getMonthViewShowState()) {
+        if (!getMonthViewShowState() || isInit) {
             if (mContentView == null)
                 return;
+            isInit = false;
             mContentView.setTranslationY(-mContentViewTranslateY);
             setMonthViewState(false);
-        } else {
-            setMonthViewState(true);
         }
     }
 
@@ -504,10 +505,11 @@ public class CalendarLayout extends LinearLayout {
                 if (isExpand()) shrink();
             }
         });
-        setMonthViewState(true);
+        setMonthViewState(false);
     }
 
     private void setMonthViewState(boolean show) {
+
         mMonthView.setVisibilityState(show);
         mWeekPager.setVisibilityState(!show);
 
@@ -691,8 +693,7 @@ public class CalendarLayout extends LinearLayout {
      */
     private void hideWeek() {
         onShowMonthView();
-        /*mWeekPager.setVisibility(GONE);
-        mMonthView.setVisibility(VISIBLE);*/
+
         setMonthViewState(true);
 
     }
@@ -703,8 +704,6 @@ public class CalendarLayout extends LinearLayout {
     private void showWeek() {
         onShowWeekView();
         mWeekPager.getAdapter().notifyDataSetChanged();
-        /*mWeekPager.setVisibility(VISIBLE);
-        mMonthView.setVisibility(INVISIBLE);*/
         setMonthViewState(false);
     }
 
