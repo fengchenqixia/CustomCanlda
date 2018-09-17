@@ -94,15 +94,7 @@ public class CustomActivity extends BaseActivity implements
     }
 
 
-    public void prevMonth(View view){
 
-        mCalendarView.scrollToPre(true);
-    }
-
-    public void nextMonth(View view){
-
-        mCalendarView.scrollToNext(true);
-    }
 
     //  对日期事件进行标注，如果不需要直接将text赋值为 "no_need",代码中会对该字段进行判断
     @Override

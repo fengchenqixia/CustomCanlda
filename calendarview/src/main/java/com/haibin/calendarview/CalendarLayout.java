@@ -94,6 +94,8 @@ public class CalendarLayout extends LinearLayout {
      */
     MonthViewPager mMonthView;
 
+    LinearLayout mMonthViewPagerParent;
+
     /**
      * 自定义的周视图
      */
@@ -484,6 +486,7 @@ public class CalendarLayout extends LinearLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mMonthViewPagerParent = findViewById(R.id.ll_month);
         mMonthView = (MonthViewPager) findViewById(R.id.vp_month);
         mWeekPager = (WeekViewPager) findViewById(R.id.vp_week);
         mContentView = (ViewGroup) findViewById(mContentViewId);
@@ -509,11 +512,11 @@ public class CalendarLayout extends LinearLayout {
         mWeekPager.setVisibilityState(!show);
 
         if (show) {
-            mMonthView.setTranslationY(0);
+            mMonthViewPagerParent.setTranslationY(0);
             mWeekPager.setTranslationY(-mViewPagerWeekHeiht);
             updateContentViewState(0);
         } else {
-            mMonthView.setTranslationY(-mContentViewTranslateY);
+            mMonthViewPagerParent.setTranslationY(-mContentViewTranslateY);
             mWeekPager.setTranslationY(0);
             updateContentViewState(-1);
         }
@@ -526,7 +529,7 @@ public class CalendarLayout extends LinearLayout {
     }
 
     private boolean getMonthViewShowState() {
-        if (mMonthView.getTranslationY() == 0) return true;
+        if (mMonthViewPagerParent.getTranslationY() == 0) return true;
         return false;
     }
 
@@ -537,14 +540,14 @@ public class CalendarLayout extends LinearLayout {
         float percent = mContentView.getTranslationY() * 1.0f / mContentViewTranslateY;
         Log.e("TAG", "translationViewPager " + mContentView.getTranslationY() + "----" + mContentViewTranslateY + "---" + percent);
         //mMonthView.setTranslationY(mViewPagerTranslateY * percent);
-        mMonthView.setTranslationY(mContentViewTranslateY * percent);
+        mMonthViewPagerParent.setTranslationY(mContentViewTranslateY * percent);
         mWeekPager.setTranslationY(-mViewPagerWeekHeiht - mViewPagerWeekHeiht * percent);
         updateContentViewState(percent);
     }
 
     private void translationViewPager(float percent) {
         Log.e("TAG", "translationViewPager percent " + mContentView.getTranslationY() + "----" + mContentViewTranslateY + "---" + percent);
-        mMonthView.setTranslationY(mContentViewTranslateY * percent);
+        mMonthViewPagerParent.setTranslationY(mContentViewTranslateY * percent);
         mWeekPager.setTranslationY(-mViewPagerWeekHeiht - mViewPagerWeekHeiht * percent);
         updateContentViewState(percent);
     }
@@ -570,11 +573,7 @@ public class CalendarLayout extends LinearLayout {
                 mCalendarShowMode == CALENDAR_SHOW_MODE_ONLY_WEEK_VIEW ||
                 mContentView == null)
             return false;
-    /*    if (mMonthView.getVisibility() != VISIBLE) {
-            mWeekPager.setVisibility(GONE);
-            onShowMonthView();
-            mMonthView.setVisibility(VISIBLE);
-        }*/
+
         ObjectAnimator objectAnimator = ObjectAnimator.ofFloat(mContentView,
                 "translationY", mContentView.getTranslationY(), 0f);
         objectAnimator.setDuration(240);
@@ -583,7 +582,6 @@ public class CalendarLayout extends LinearLayout {
             public void onAnimationUpdate(ValueAnimator animation) {
                 float currentValue = (Float) animation.getAnimatedValue();
                 float percent = currentValue * 1.0f / mContentViewTranslateY;
-                //mMonthView.setTranslationY(mViewPagerTranslateY * percent);
                 translationViewPager(percent);
                 isAnimating = true;
             }
@@ -620,7 +618,6 @@ public class CalendarLayout extends LinearLayout {
             public void onAnimationUpdate(ValueAnimator animation) {
                 float currentValue = (Float) animation.getAnimatedValue();
                 float percent = currentValue * 1.0f / mContentViewTranslateY;
-                //mMonthView.setTranslationY(mViewPagerTranslateY * percent);
                 translationViewPager(percent);
                 isAnimating = true;
             }

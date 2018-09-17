@@ -28,6 +28,7 @@ import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import java.lang.reflect.Constructor;
 import java.util.List;
@@ -51,6 +52,7 @@ public class CalendarView extends FrameLayout {
     private MonthViewPager mMonthPager;
     private LinearLayout MonthViewPagerParent;
 
+    private TextView mCurrentMonth;
     /**
      * 日历周视图
      */
@@ -95,6 +97,13 @@ public class CalendarView extends FrameLayout {
     private void init(Context context) {
         LayoutInflater.from(context).inflate(R.layout.cv_layout_calendar_view, this, true);
         FrameLayout frameContent = (FrameLayout) findViewById(R.id.frameContent);
+        mCurrentMonth = findViewById(R.id.current_month);
+        setOnMonthChangeListener(new OnMonthChangeListener() {
+            @Override
+            public void onMonthChange(int year, int month) {
+                mCurrentMonth.setText(year + "年" + month + "月");
+            }
+        });
         this.mWeekPager = (WeekViewPager) findViewById(R.id.vp_week);
         this.mWeekPager.setup(mDelegate);
 
@@ -230,7 +239,22 @@ public class CalendarView extends FrameLayout {
         });
         mSelectLayout.setup(mDelegate);
         mWeekPager.updateSelected(mDelegate.createCurrentDate(), false);
+
+        findViewById(R.id.prevMonth).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                scrollToPre(true);
+            }
+        });
+
+        findViewById(R.id.nextMonth).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                scrollToNext(true);
+            }
+        });
     }
+
 
     /**
      * 设置日期范围
