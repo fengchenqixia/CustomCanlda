@@ -52,6 +52,7 @@ public class CalendarLayout extends LinearLayout {
 
     private static final int INVALID_POINTER = -1;
 
+    private Context mContext;
     /**
      * 周月视图
      */
@@ -136,7 +137,6 @@ public class CalendarLayout extends LinearLayout {
     private int mTouchSlop;
     private int mContentViewTranslateY; //ContentView  可滑动的最大距离距离 , 固定
     private int mViewPagerTranslateY = 0;// ViewPager可以平移的距离，不代表mMonthView的平移距离
-    private int mViewPagerMonthHeight;//  月视图完整的高度
     private int mViewPagerWeekHeiht;//周视图完整的高度
 
     private float downY;
@@ -162,6 +162,7 @@ public class CalendarLayout extends LinearLayout {
 
     public CalendarLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mContext = context;
         setOrientation(LinearLayout.VERTICAL);
         TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.CalendarLayout);
         mContentViewId = array.getResourceId(R.styleable.CalendarLayout_calendar_content_view_id, 0);
@@ -233,13 +234,13 @@ public class CalendarLayout extends LinearLayout {
         mViewPagerWeekHeiht = mItemHeight;
         Calendar calendar = mDelegate.mIndexCalendar;
         if (mDelegate.getMonthViewShowMode() == CalendarViewDelegate.MODE_ALL_MONTH) {
-            mContentViewTranslateY = 5 * mItemHeight;
-            mViewPagerMonthHeight = 5 * mItemHeight;
+            mContentViewTranslateY = 5 * mItemHeight+CalendarUtil.dipToPx(mContext, 40);
+
 
         } else {
             mContentViewTranslateY = CalendarUtil.getMonthViewHeight(calendar.getYear(), calendar.getMonth(), mItemHeight, mDelegate.getWeekStart())
-                    - mItemHeight;
-            mViewPagerMonthHeight = mContentViewTranslateY + mItemHeight;
+                    - mItemHeight+CalendarUtil.dipToPx(mContext, 40);
+
         }
         //已经显示周视图，则需要动态平移contentView的高度
         if (!getMonthViewShowState()) {

@@ -28,7 +28,7 @@ public class CustomActivity extends BaseActivity implements
 
     private TextView mTitle;
 
-    private TextView mCurrentDay;
+
 
 
 
@@ -61,11 +61,11 @@ public class CustomActivity extends BaseActivity implements
         mCalendarView.setOnCalendarSelectListener(this);
         mCalendarView.setOnYearChangeListener(this);
         mTitle = findViewById(R.id.toolbar_title);
-        mCurrentDay = findViewById(R.id.current_month);
+
 
         Log.e(TAG,  mCalendarView.getCurYear()+mCalendarView.getCurMonth()+mCalendarView.getCurDay()+"");
         mTitle.setText(mCalendarView.getCurMonth()+"月"+ mCalendarView.getCurDay()+"日");
-        mCurrentDay.setText(mCalendarView.getCurYear()+"年"+mCalendarView.getCurMonth()+"月");
+
         findViewById(R.id.toggleView).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -150,7 +150,7 @@ public class CustomActivity extends BaseActivity implements
     @Override
     public void onCalendarSelect(Calendar calendar, boolean isClick) {
         mTitle.setText(calendar.getMonth() + "月" + calendar.getDay() + "日");
-        mCurrentDay.setText(calendar.getYear()+"年"+calendar.getMonth()+"月");
+
     }
 
     @Override

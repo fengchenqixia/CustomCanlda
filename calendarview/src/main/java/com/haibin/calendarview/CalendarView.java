@@ -27,6 +27,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import java.lang.reflect.Constructor;
 import java.util.List;
@@ -48,6 +49,7 @@ public class CalendarView extends FrameLayout {
      * 自定义自适应高度的ViewPager
      */
     private MonthViewPager mMonthPager;
+    private LinearLayout MonthViewPagerParent;
 
     /**
      * 日历周视图
@@ -120,11 +122,13 @@ public class CalendarView extends FrameLayout {
                 0);
         this.mWeekLine.setLayoutParams(lineParams);
 
+        this.MonthViewPagerParent = findViewById(R.id.ll_month);
         this.mMonthPager = (MonthViewPager) findViewById(R.id.vp_month);
         this.mMonthPager.mWeekPager = mWeekPager;
         this.mMonthPager.mWeekBar = mWeekBar;
-        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) this.mMonthPager.getLayoutParams();
+        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) this.MonthViewPagerParent.getLayoutParams();
         params.setMargins(0, mDelegate.getWeekBarHeight() + CalendarUtil.dipToPx(context, 1), 0, 0);
+
         mWeekPager.setLayoutParams(params);
 
 
